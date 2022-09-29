@@ -98,6 +98,42 @@ But this only gives one smooth line for all three different groups. We can chang
 ```{r}
 weather_df %>% 
   ggplot(aes(x = tmin, y = tmax, colour = name)) +
-  geom_point() +
-  geom_smooth()
+  geom_point(alpha = 0.3) +
+  geom_smooth(se = FALSE)
 ```
+
+alpha is how transparent the points are.
+`se = FALSE` removes the error bars from the plot.
+
+Maybe make separate panels.
+
+```{r}
+weather_df %>% 
+  ggplot(aes(x = tmin, y = tmax, colour = name)) +
+  geom_point(alpha = 0.3) +
+  geom_smooth(se = FALSE) +
+  facet_grid(. ~ name)
+```
+
+`tmax` vs `tmin` is boring, let's spice it up some.
+
+```{r}
+weather_df %>% 
+  ggplot(aes(x = date, y = tmax, colour = name)) + 
+  geom_point(aes(size = prcp), alpha = 0.3) +
+  geom_smooth(se = FALSE) +
+ facet_grid(. ~ name) +
+ theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+```
+
+Last line from google stackoverflow to rotate x-axis labels. 
+
+## Some quick stuff
+
+```{r}
+weather_df %>% 
+  ggplot(aes(x = tmin, y = tmax)) +
+  geom_hex()
+```
+
+Using hexagons instead of points when you have lots of rows, better for visualization for huge dataset. 
