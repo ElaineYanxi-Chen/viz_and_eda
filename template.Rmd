@@ -1,7 +1,7 @@
 ---
-title: "Simple document"
+title: "Visualization I"
 author: "Elaine Yanxi Chen"
-date: 2022-09-13
+date: 2022-09-29
 output: 
   github_document
     
@@ -9,80 +9,95 @@ output:
     
 ---
 
-```{r}
+```{r, echo = FALSE}
 library(tidyverse)
+library(ggridges)
 ```
 
-I'm an R Markdown document! 
-
-# Section 1
-
-Here's a **code chunk** that samples from 
-a _normal distribution_:
-
-**for bold**
-_italized_
+Copy code from the course website to download data.
 
 ```{r}
-samp = rnorm(100)
-length(samp)
+weather_df = 
+  rnoaa::meteo_pull_monitors(
+    c("USW00094728", "USC00519397", "USS0023B17S"),
+    var = c("PRCP", "TMIN", "TMAX"), 
+    date_min = "2017-01-01",
+    date_max = "2017-12-31") %>%
+  mutate(
+    name = recode(
+      id, 
+      USW00094728 = "CentralPark_NY", 
+      USC00519397 = "Waikiki_HA",
+      USS0023B17S = "Waterhole_WA"),
+    tmin = tmin / 10,
+    tmax = tmax / 10) %>%
+  select(name, id, everything())
+
+weather_df %>% view
 ```
 
-# Section 2
+## Scatterplot
 
-I can take the mean of the sample, too!
-The mean is `r mean(samp)`.
-Can regulate the digits in `r round(mean(samp), 2)`
-
-In-line r code, used very rarely, but useful
-
-# Section 3
-
-## Plot from last time 
-
-This is going to make a plot. First I generate a dataframe, then use `ggplot` to
-make a scatterplot.
-
-Keystroke for creating a code chunk: Option + Command + I 
-
-
+Let's make a scatterplot
 
 ```{r}
-plot_df = 
-  tibble(
-    x = rnorm(n = 1000),
-    y = 1 + 2 * x + rnorm(n = 1000)
-  )
-ggplot(plot_df, aes(x = x, y = y)) + geom_point()
+ggplot(weather_df, aes(x = tmin, y = tmax)) + geom_point()
 ```
 
-## Plot for learning Assessment
+Let's make the same scatterplot but different.
 
-```{r Learning Assessment 1}
-library(tidyverse)
-
-la_df =
-  tibble(
-    norm = rnorm(n = 500, mean = 1),
-    logical = norm > 0,
-    abs_norm = abs(norm)
-  )
-
-
-median_norm = median(pull(la_df, norm))
+```{r}
+weather_df %>%
+  drop_na() %>% 
+  filter(name == "CentralPark_NY") %>% 
+  ggplot(aes(x = tmin, y = tmax)) +
+  geom_point()
 ```
 
-The median of the variable containing absolute values is `r round(median_norm, digits = 2)`
+Can save ggplot objects and continue to print or edit. Can have a base figure and have different type of figures superimpose on top of it. Save and export explicitly. 
 
-Here's a list:
+```{r}
+weather_scatterplot =
+  weather_df %>%
+  drop_na() %>% 
+  ggplot(aes(x = tmin, y = tmax)) 
 
-* List item 1
-* List item 2
+weather_scatterplot +
+  geom_point()
+```
 
-Here is a list for the learning assessment:
+## Let's fancy this up a bit
 
-* The mean of the original random sample is `r mean(pull(la_df, norm))`
+Want colour: mapping variable to aesthetics
 
-* The median of the sample is `r median(pull(la_df, norm))`
+```{r}
+weather_df %>% 
+  ggplot(aes(x = tmin, y = tmax, colour = name)) +
+  geom_point()
+```
 
-* The standard deviation of the sample is `r sd(pull(la_df, norm))`
+Can define aesthetics mapping for specific geometry.
+
+```{r}
+weather_df %>% 
+  ggplot(aes(x = tmin, y = tmax)) +
+  geom_point(aes(colour = name))
+```
+
+Add in a new aesthetics.
+
+```{r}
+weather_df %>% 
+  ggplot(aes(x = tmin, y = tmax)) +
+  geom_point(aes(colour = name)) +
+  geom_smooth()
+```
+
+But this only gives one smooth line for all three different groups. We can change that.
+
+```{r}
+weather_df %>% 
+  ggplot(aes(x = tmin, y = tmax, colour = name)) +
+  geom_point() +
+  geom_smooth()
+```
