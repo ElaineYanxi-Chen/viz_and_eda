@@ -123,7 +123,7 @@ weather_df %>%
   geom_point(aes(size = prcp), alpha = 0.3) +
   geom_smooth(se = FALSE) +
  facet_grid(. ~ name) +
- theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+ theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
 ```
 
 Last line from google stackoverflow to rotate x-axis labels. 
@@ -137,3 +137,52 @@ weather_df %>%
 ```
 
 Using hexagons instead of points when you have lots of rows, better for visualization for huge dataset. 
+
+
+## Univariate plots ...
+
+Histograms, barplots, boxplots, violins, ...
+
+```{r}
+weather_df %>% 
+  ggplot(aes(x = tmax, fill = name)) +
+  geom_histogram() +
+  facet_grid(. ~ name)
+```
+
+In histograms colour is the outside of the bar. Use fill more. 
+
+Let's see more options!
+
+```{r}
+weather_df %>% 
+  ggplot(aes(x = tmax, fill = name)) +
+  geom_density(alpha = 0.3)
+```
+
+Boxplots?
+
+```{r}
+weather_df %>% 
+  ggplot(aes(x = name, y = tmax, fill = name)) +
+  geom_boxplot()
+```
+
+Violin plots?
+
+```{r}
+weather_df %>% 
+  ggplot(aes(x = name, y = tmax, fill = name)) +
+  geom_violin()
+```
+
+With multiple comparisons, e.g. 20 - 30 distributions to stack up
+
+OR
+
+```{r}
+weather_df %>% 
+  ggplot(aes(x = tmax, y = name)) +
+  geom_density_ridges()
+```
+
