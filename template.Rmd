@@ -1,0 +1,88 @@
+---
+title: "Simple document"
+author: "Elaine Yanxi Chen"
+date: 2022-09-13
+output: 
+  github_document
+    
+
+    
+---
+
+```{r}
+library(tidyverse)
+```
+
+I'm an R Markdown document! 
+
+# Section 1
+
+Here's a **code chunk** that samples from 
+a _normal distribution_:
+
+**for bold**
+_italized_
+
+```{r}
+samp = rnorm(100)
+length(samp)
+```
+
+# Section 2
+
+I can take the mean of the sample, too!
+The mean is `r mean(samp)`.
+Can regulate the digits in `r round(mean(samp), 2)`
+
+In-line r code, used very rarely, but useful
+
+# Section 3
+
+## Plot from last time 
+
+This is going to make a plot. First I generate a dataframe, then use `ggplot` to
+make a scatterplot.
+
+Keystroke for creating a code chunk: Option + Command + I 
+
+
+
+```{r}
+plot_df = 
+  tibble(
+    x = rnorm(n = 1000),
+    y = 1 + 2 * x + rnorm(n = 1000)
+  )
+ggplot(plot_df, aes(x = x, y = y)) + geom_point()
+```
+
+## Plot for learning Assessment
+
+```{r Learning Assessment 1}
+library(tidyverse)
+
+la_df =
+  tibble(
+    norm = rnorm(n = 500, mean = 1),
+    logical = norm > 0,
+    abs_norm = abs(norm)
+  )
+
+
+median_norm = median(pull(la_df, norm))
+```
+
+The median of the variable containing absolute values is `r round(median_norm, digits = 2)`
+
+Here's a list:
+
+* List item 1
+* List item 2
+
+Here is a list for the learning assessment:
+
+* The mean of the original random sample is `r mean(pull(la_df, norm))`
+
+* The median of the sample is `r median(pull(la_df, norm))`
+
+* The standard deviation of the sample is `r sd(pull(la_df, norm))`
