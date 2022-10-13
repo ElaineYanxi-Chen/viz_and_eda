@@ -36,3 +36,44 @@ weather_df =
 weather_df %>% view
 ```
 
+
+## Scatterplot
+
+But better this time 
+
+can play around with various scales
+
+```{r}
+weather_df %>% 
+  ggplot(aes(x = tmin, y = tmax, colour = name)) +
+  geom_point(alpha = 0.5) +
+  labs(
+    x = "Minimum Daily Temp(C)",
+    y = "Maximum Daily Temp(C)",
+    title = "Scatterplot of daily temp extremes",
+    caption = "data come from the rnoaa package"
+  ) +
+  scale_x_continuous(
+    breaks = c(-10, 0, 15),
+    labels = c("-10C", "0", "15") 
+  )
+```
+
+Can also change colours
+Make a new version
+
+```{r}
+weather_df %>% 
+  ggplot(aes(x = tmin, y = tmax, colour = name)) +
+  geom_point(alpha = 0.5) +
+  labs(
+    x = "Minimum Daily Temp(C)",
+    y = "Maximum Daily Temp(C)",
+    title = "Scatterplot of daily temp extremes",
+    caption = "data come from the rnoaa package"
+  ) +
+  viridis::scale_colour_viridis(
+    name = "Location",
+    discrete = TRUE)
+```
+
