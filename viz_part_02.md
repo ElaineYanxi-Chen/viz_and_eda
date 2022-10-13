@@ -134,3 +134,105 @@ ggp_weather +
 
 can get rid of the legend with “none” the order of the theme commands
 matter; need to be careful;
+
+## Data in geom()
+
+``` r
+central_park_df = weather_df %>% 
+  filter(name == "CentralPark_NY")
+
+waikiki_df = 
+  weather_df %>% filter(name == "Waikiki_HA")
+
+ggplot(waikiki_df, aes(x = date, y = tmax)) +
+  geom_point() +
+  geom_line(data = central_park_df)
+```
+
+    ## Warning: Removed 3 rows containing missing values (geom_point).
+
+![](viz_part_02_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
+
+Useful for calculating monthly average, etc
+
+## Patchwork…
+
+``` r
+tmax_tmin_plot =
+  weather_df %>% 
+  ggplot(aes(x = tmin, y = tmax, colour = name)) +
+  geom_point() +
+  theme(legend.position = "none")
+
+prcp_density_plot = 
+  weather_df %>% 
+  filter(prcp > 0) %>% 
+  ggplot(aes(x = prcp, fill = name)) +
+  geom_density(alpha = 0.5) +
+  theme(legend.position = "none")
+
+seasonality_plot = 
+  weather_df %>% 
+  ggplot(aes(x = date, y = tmax, colour = name)) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(se = FALSE) +
+  theme(legend.position = "none")
+
+(tmax_tmin_plot + prcp_density_plot) / seasonality_plot
+```
+
+    ## Warning: Removed 15 rows containing missing values (geom_point).
+
+    ## `geom_smooth()` using method = 'loess' and formula 'y ~ x'
+
+    ## Warning: Removed 3 rows containing non-finite values (stat_smooth).
+
+    ## Warning: Removed 3 rows containing missing values (geom_point).
+
+![](viz_part_02_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
+
+## Data manipulation
+
+``` r
+weather_df %>% 
+  mutate(name = fct_relevel(name, "Waikiki_HA")) %>% 
+  ggplot(aes(x = name, y = tmax)) +
+  geom_boxplot()
+```
+
+    ## Warning: Removed 3 rows containing non-finite values (stat_boxplot).
+
+![](viz_part_02_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+
+``` r
+weather_df %>% 
+  mutate(name = fct_reorder(name, tmax)) %>% 
+  ggplot(aes(x = name, y = tmax)) +
+  geom_boxplot()
+```
+
+    ## Warning: Removed 3 rows containing non-finite values (stat_boxplot).
+
+![](viz_part_02_files/figure-gfm/unnamed-chunk-9-2.png)<!-- -->
+
+``` r
+pulse_df = 
+  haven::read_sas("data/public_pulse_data.sas7bdat") %>% 
+  janitor::clean_names() %>% 
+  pivot_longer(
+    bdi_score_bl:bdi_score_12m,
+    names_to = "visit",
+    values_to = "bdi",
+    names_prefix = "bdi_score_"
+  ) %>% 
+  select(id, visit, everything()) %>% 
+  mutate(visit = fct_relevel(visit, "bl"))
+
+pulse_df %>% 
+  ggplot(aes(x = visit, y = bdi)) +
+  geom_boxplot()
+```
+
+    ## Warning: Removed 879 rows containing non-finite values (stat_boxplot).
+
+![](viz_part_02_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
