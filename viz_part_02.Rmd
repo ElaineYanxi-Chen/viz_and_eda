@@ -77,3 +77,30 @@ weather_df %>%
     discrete = TRUE)
 ```
 
+
+## Themes 
+
+```{r}
+ggp_weather = weather_df %>% 
+  ggplot(aes(x = tmin, y = tmax, colour = name)) +
+  geom_point(alpha = 0.5) +
+  labs(
+    x = "Minimum Daily Temp(C)",
+    y = "Maximum Daily Temp(C)",
+    title = "Scatterplot of daily temp extremes",
+    caption = "data come from the rnoaa package"
+  ) +
+  viridis::scale_colour_viridis(
+    name = "Location",
+    discrete = TRUE)
+```
+
+```{r}
+ggp_weather +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+```
+
+can get rid of the legend with "none"
+the order of the theme commands matter; need to be careful;
+
