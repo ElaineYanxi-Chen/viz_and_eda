@@ -170,3 +170,41 @@ weather_df %>%
   knitr::kable(digits = 2)
 ```
 
+
+## Grouped mutates
+
+```{r}
+weather_df %>% 
+  group_by(name) %>% 
+  mutate(mean_tmax = mean(tmax, na.rm = TRUE),
+         centered_tmax = tmax - mean_tmax) %>% 
+  ggplot(aes(x = date, y = centered_tmax, colour = name)) +
+  geom_point()
+```
+
+lagged observations
+
+```{r}
+weather_df %>% 
+  group_by(name) %>% 
+  mutate(
+    yesterday_tmax = lag(tmax),
+    tmax_change = tmax - yesterday_tmax
+  ) %>% 
+  summarize(
+    sd_tmax_change = sd(tmax_change, na.rm = TRUE)
+  )
+```
+
+One other window function...
+
+```{r}
+weather_df %>% 
+  group_by(name, month) %>% 
+  mutate(
+    tmax_rank = min_rank(tmax)
+  ) %>% 
+  filter(tmax_rank < 4) %>% 
+  arrange(name, month, tmax_rank)
+```
+
