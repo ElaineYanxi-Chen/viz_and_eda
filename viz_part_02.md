@@ -1,7 +1,13 @@
-via_part_02
+numeric_eda
 ================
 Elaine Yanxi Chen
-2022-10-04
+2022-10-06
+
+## Let’s import data
+
+``` r
+library(tidyverse)
+```
 
     ## ── Attaching packages ─────────────────────────────────────── tidyverse 1.3.2 ──
     ## ✔ ggplot2 3.3.6     ✔ purrr   0.3.4
@@ -28,7 +34,8 @@ weather_df =
       USC00519397 = "Waikiki_HA",
       USS0023B17S = "Waterhole_WA"),
     tmin = tmin / 10,
-    tmax = tmax / 10) %>%
+    tmax = tmax / 10,
+    month = lubridate::floor_date(date, unit = "month")) %>%
   select(name, id, everything())
 ```
 
@@ -58,181 +65,113 @@ weather_df =
 weather_df %>% view
 ```
 
-## Scatterplot
-
-But better this time
-
-can play around with various scales
+## `group_by()`
 
 ``` r
 weather_df %>% 
-  ggplot(aes(x = tmin, y = tmax, colour = name)) +
-  geom_point(alpha = 0.5) +
-  labs(
-    x = "Minimum Daily Temp(C)",
-    y = "Maximum Daily Temp(C)",
-    title = "Scatterplot of daily temp extremes",
-    caption = "data come from the rnoaa package"
-  ) +
-  scale_x_continuous(
-    breaks = c(-10, 0, 15),
-    labels = c("-10C", "0", "15") 
+  group_by(name, month)
+```
+
+    ## # A tibble: 1,095 × 7
+    ## # Groups:   name, month [36]
+    ##    name           id          date        prcp  tmax  tmin month     
+    ##    <chr>          <chr>       <date>     <dbl> <dbl> <dbl> <date>    
+    ##  1 CentralPark_NY USW00094728 2017-01-01     0   8.9   4.4 2017-01-01
+    ##  2 CentralPark_NY USW00094728 2017-01-02    53   5     2.8 2017-01-01
+    ##  3 CentralPark_NY USW00094728 2017-01-03   147   6.1   3.9 2017-01-01
+    ##  4 CentralPark_NY USW00094728 2017-01-04     0  11.1   1.1 2017-01-01
+    ##  5 CentralPark_NY USW00094728 2017-01-05     0   1.1  -2.7 2017-01-01
+    ##  6 CentralPark_NY USW00094728 2017-01-06    13   0.6  -3.8 2017-01-01
+    ##  7 CentralPark_NY USW00094728 2017-01-07    81  -3.2  -6.6 2017-01-01
+    ##  8 CentralPark_NY USW00094728 2017-01-08     0  -3.8  -8.8 2017-01-01
+    ##  9 CentralPark_NY USW00094728 2017-01-09     0  -4.9  -9.9 2017-01-01
+    ## 10 CentralPark_NY USW00094728 2017-01-10     0   7.8  -6   2017-01-01
+    ## # … with 1,085 more rows
+
+## `summarize()`
+
+let’s group and then summarize!
+
+``` r
+weather_df %>% 
+  group_by(name, month) %>% 
+  summarize(
+    n_obs = n()
   )
 ```
 
-    ## Warning: Removed 15 rows containing missing values (geom_point).
+    ## `summarise()` has grouped output by 'name'. You can override using the
+    ## `.groups` argument.
 
-![](viz_part_02_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
+    ## # A tibble: 36 × 3
+    ## # Groups:   name [3]
+    ##    name           month      n_obs
+    ##    <chr>          <date>     <int>
+    ##  1 CentralPark_NY 2017-01-01    31
+    ##  2 CentralPark_NY 2017-02-01    28
+    ##  3 CentralPark_NY 2017-03-01    31
+    ##  4 CentralPark_NY 2017-04-01    30
+    ##  5 CentralPark_NY 2017-05-01    31
+    ##  6 CentralPark_NY 2017-06-01    30
+    ##  7 CentralPark_NY 2017-07-01    31
+    ##  8 CentralPark_NY 2017-08-01    31
+    ##  9 CentralPark_NY 2017-09-01    30
+    ## 10 CentralPark_NY 2017-10-01    31
+    ## # … with 26 more rows
 
-Can also change colours Make a new version
-
-``` r
-weather_df %>% 
-  ggplot(aes(x = tmin, y = tmax, colour = name)) +
-  geom_point(alpha = 0.5) +
-  labs(
-    x = "Minimum Daily Temp(C)",
-    y = "Maximum Daily Temp(C)",
-    title = "Scatterplot of daily temp extremes",
-    caption = "data come from the rnoaa package"
-  ) +
-  viridis::scale_colour_viridis(
-    name = "Location",
-    discrete = TRUE)
-```
-
-    ## Warning: Removed 15 rows containing missing values (geom_point).
-
-![](viz_part_02_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
-
-## Themes
-
-``` r
-ggp_weather = weather_df %>% 
-  ggplot(aes(x = tmin, y = tmax, colour = name)) +
-  geom_point(alpha = 0.5) +
-  labs(
-    x = "Minimum Daily Temp(C)",
-    y = "Maximum Daily Temp(C)",
-    title = "Scatterplot of daily temp extremes",
-    caption = "data come from the rnoaa package"
-  ) +
-  viridis::scale_colour_viridis(
-    name = "Location",
-    discrete = TRUE)
-```
-
-``` r
-ggp_weather +
-  theme_minimal() +
-  theme(legend.position = "bottom")
-```
-
-    ## Warning: Removed 15 rows containing missing values (geom_point).
-
-![](viz_part_02_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
-
-can get rid of the legend with “none” the order of the theme commands
-matter; need to be careful;
-
-## Data in geom()
-
-``` r
-central_park_df = weather_df %>% 
-  filter(name == "CentralPark_NY")
-
-waikiki_df = 
-  weather_df %>% filter(name == "Waikiki_HA")
-
-ggplot(waikiki_df, aes(x = date, y = tmax)) +
-  geom_point() +
-  geom_line(data = central_park_df)
-```
-
-    ## Warning: Removed 3 rows containing missing values (geom_point).
-
-![](viz_part_02_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
-
-Useful for calculating monthly average, etc
-
-## Patchwork…
-
-``` r
-tmax_tmin_plot =
-  weather_df %>% 
-  ggplot(aes(x = tmin, y = tmax, colour = name)) +
-  geom_point() +
-  theme(legend.position = "none")
-
-prcp_density_plot = 
-  weather_df %>% 
-  filter(prcp > 0) %>% 
-  ggplot(aes(x = prcp, fill = name)) +
-  geom_density(alpha = 0.5) +
-  theme(legend.position = "none")
-
-seasonality_plot = 
-  weather_df %>% 
-  ggplot(aes(x = date, y = tmax, colour = name)) +
-  geom_point(alpha = 0.5) +
-  geom_smooth(se = FALSE) +
-  theme(legend.position = "none")
-
-(tmax_tmin_plot + prcp_density_plot) / seasonality_plot
-```
-
-    ## Warning: Removed 15 rows containing missing values (geom_point).
-
-    ## `geom_smooth()` using method = 'loess' and formula 'y ~ x'
-
-    ## Warning: Removed 3 rows containing non-finite values (stat_smooth).
-
-    ## Warning: Removed 3 rows containing missing values (geom_point).
-
-![](viz_part_02_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
-
-## Data manipulation
+can we count in other ways?
 
 ``` r
 weather_df %>% 
-  mutate(name = fct_relevel(name, "Waikiki_HA")) %>% 
-  ggplot(aes(x = name, y = tmax)) +
-  geom_boxplot()
+  count(name, month)
 ```
 
-    ## Warning: Removed 3 rows containing non-finite values (stat_boxplot).
+    ## # A tibble: 36 × 3
+    ##    name           month          n
+    ##    <chr>          <date>     <int>
+    ##  1 CentralPark_NY 2017-01-01    31
+    ##  2 CentralPark_NY 2017-02-01    28
+    ##  3 CentralPark_NY 2017-03-01    31
+    ##  4 CentralPark_NY 2017-04-01    30
+    ##  5 CentralPark_NY 2017-05-01    31
+    ##  6 CentralPark_NY 2017-06-01    30
+    ##  7 CentralPark_NY 2017-07-01    31
+    ##  8 CentralPark_NY 2017-08-01    31
+    ##  9 CentralPark_NY 2017-09-01    30
+    ## 10 CentralPark_NY 2017-10-01    31
+    ## # … with 26 more rows
 
-![](viz_part_02_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+don’t use `table()` because it doesn’t form a dataframe
 
 ``` r
 weather_df %>% 
-  mutate(name = fct_reorder(name, tmax)) %>% 
-  ggplot(aes(x = name, y = tmax)) +
-  geom_boxplot()
+  pull(month) %>% 
+  table()
 ```
 
-    ## Warning: Removed 3 rows containing non-finite values (stat_boxplot).
-
-![](viz_part_02_files/figure-gfm/unnamed-chunk-9-2.png)<!-- -->
+you can have multiple summaries
 
 ``` r
-pulse_df = 
-  haven::read_sas("data/public_pulse_data.sas7bdat") %>% 
-  janitor::clean_names() %>% 
-  pivot_longer(
-    bdi_score_bl:bdi_score_12m,
-    names_to = "visit",
-    values_to = "bdi",
-    names_prefix = "bdi_score_"
-  ) %>% 
-  select(id, visit, everything()) %>% 
-  mutate(visit = fct_relevel(visit, "bl"))
-
-pulse_df %>% 
-  ggplot(aes(x = visit, y = bdi)) +
-  geom_boxplot()
+weather_df %>% 
+  group_by(month) %>% 
+  summarize(
+    n_obs = n(),
+    n_dist = n_distinct()
+  )
 ```
 
-    ## Warning: Removed 879 rows containing non-finite values (stat_boxplot).
-
-![](viz_part_02_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
+    ## # A tibble: 12 × 3
+    ##    month      n_obs n_dist
+    ##    <date>     <int>  <int>
+    ##  1 2017-01-01    93      0
+    ##  2 2017-02-01    84      0
+    ##  3 2017-03-01    93      0
+    ##  4 2017-04-01    90      0
+    ##  5 2017-05-01    93      0
+    ##  6 2017-06-01    90      0
+    ##  7 2017-07-01    93      0
+    ##  8 2017-08-01    93      0
+    ##  9 2017-09-01    90      0
+    ## 10 2017-10-01    93      0
+    ## 11 2017-11-01    90      0
+    ## 12 2017-12-01    93      0
