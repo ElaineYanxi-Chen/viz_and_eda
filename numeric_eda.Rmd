@@ -86,7 +86,40 @@ weather_df %>%
   group_by(month) %>% 
   summarize(
     n_obs = n(),
-    n_dist = n_distinct()
+    n_dist = n_distinct(date)
   )
+```
+
+
+## a brief aside on 2x2 tables
+
+```{r}
+weather_df %>% 
+  mutate(
+    cold = case_when(
+      tmax <  5 ~ "cold",
+      tmax >= 5 ~ "not_cold",
+      TRUE      ~ ""
+  )) %>% 
+  filter(name != "Waikiki_HA") %>% 
+  group_by(name, cold) %>% 
+  summarize(n_obs = n()) %>% 
+  pivot_wider(
+    names_from = cold,
+    values_from = n_obs
+  )
+```
+
+
+```{r}
+weather_df %>% 
+  mutate(
+    cold = case_when(
+      tmax <  5 ~ "cold",
+      tmax >= 5 ~ "not_cold",
+      TRUE      ~ ""
+  )) %>% 
+  filter(name != "Waikiki_HA") %>% 
+  janitor::tabyl(name, cold)
 ```
 
